@@ -9,7 +9,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "preact": "^11.0.2"
+    "@preact/signals": "^2.11.4",
+    "pocketbase": "^0.28.2",
+    "preact": "^11.0.2",
+    "preact-iso": "^2.12.2"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.10.6",

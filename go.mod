@@ -2,6 +2,8 @@ module marketplace-c2c
 
 go 1.27.3
 
+require github.com/pocketbase/pocketbase v0.40.6
+
 require (
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
 	github.com/disintegration/imaging v1.6.2 // indirect
@@ -19,7 +21,6 @@ require (
 	github.com/ncruces/go-strftime v1.1.0 // indirect
 	github.com/pocketbase/dbx v1.12.0 // indirect
 	github.com/pocketbase/ozzo-validation/v4 v4.3.0 // indirect
-	github.com/pocketbase/pocketbase v0.40.6 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/spf13/cobra v1.10.2 // indirect

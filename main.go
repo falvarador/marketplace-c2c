@@ -3,23 +3,21 @@ package main
 import (
 	"log"
 
+	"marketplace-c2c/internal/hooks"
+	"marketplace-c2c/internal/schema"
+	"marketplace-c2c/internal/server"
+
 	"github.com/pocketbase/pocketbase"
-	"github.com/pocketbase/pocketbase/core"
-	"github.com/pocketbase/pocketbase/apis"
-	"os"
 )
 
 func main() {
-    app := pocketbase.New()
+	app := pocketbase.New()
 
-    app.OnServe().BindFunc(func(se *core.ServeEvent) error {
-        // serves static files from the provided public dir (if exists)
-        se.Router.GET("/{path...}", apis.Static(os.DirFS("./pb_public"), false))
+	schema.Register(app)
+	hooks.Register(app)
+	server.Register(app)
 
-        return se.Next()
-    })
-
-    if err := app.Start(); err != nil {
-        log.Fatal(err)
-    }
+	if err := app.Start(); err != nil {
+		log.Fatal(err)
+	}
 }
