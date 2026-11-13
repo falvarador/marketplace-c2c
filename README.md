@@ -1,8 +1,7 @@
 # Generic Marketplace
 
-This repository is transitioning to a modular marketplace backend based on
-MercurJS and Medusa v2. The API lives in `apps/api`; the existing Go/PocketBase
-application is retained during the transition. The Preact storefront in
+This repository contains a modular marketplace backend based on MercurJS and
+Medusa v2. The API lives in `apps/api`. The Preact storefront in
 `apps/storefront` provides catalog discovery, product details, buyer activity,
 and seller product-management routes backed by the Store and Vendor APIs.
 
@@ -80,8 +79,8 @@ npm run build
 
 `npm run build` builds the Mercur API and Preact storefront; it requires the
 configured `apps/api/.env`. `npm test` runs the API policy/access-control tests
-and storefront unit tests. `npm run legacy:build` remains available for the
-original root Vite starter during the transition.
+and storefront unit tests. `npm run dev` starts the current storefront, and
+`npm run preview` previews its production build.
 
 The storefront exposes `/explorar` for category attributes, price, location,
 and URL-synchronized catalog filters; `/item/:handle` for checkout, contact,
@@ -102,5 +101,5 @@ access.
   category overrides take precedence over the configured default transaction
   mode.
 
-See `openspec/changes/mercurjs-generic-marketplace/` for the implementation
-specification and current task progress.
+See `openspec/changes/archive/2026-11-12-mercurjs-generic-marketplace/` for the
+implementation specification and task history.
