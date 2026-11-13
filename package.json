@@ -10,7 +10,7 @@
     "apps/*"
   ],
   "scripts": {
-    "dev": "npm run storefront:dev",
+    "dev": "concurrently -n api,storefront -c blue,green \"npm:api:dev\" \"npm:storefront:dev\"",
     "build": "npm run api:build && npm run storefront:build",
     "preview": "npm run preview --workspace @marketplace/storefront",
     "api:dev": "npm run dev --workspace @marketplace/api",
@@ -28,5 +28,8 @@
     "docker:down": "docker compose down",
     "docker:clean": "docker compose down -v",
     "docker:logs": "docker compose logs -f"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.7"
   }
 }
