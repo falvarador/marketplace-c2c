@@ -1,48 +1,105 @@
-# 🪑 C2C Marketplace
+# Generic Marketplace
 
-A lightweight Customer-to-Customer (C2C) classifieds web platform for buying something that you want.
+This repository contains a modular marketplace backend based on MercurJS and
+Medusa v2. The API lives in `apps/api`. The Preact storefront in
+`apps/storefront` provides catalog discovery, product details, buyer activity,
+and seller product-management routes backed by the Store and Vendor APIs.
 
-Engineered around an ultra-lightweight architecture that combines the snappy user experience of a **Preact SPA** with the portability of **PocketBase extended as a Go framework**. The entire platform compiles into a single self-contained binary without sacrificing search engine optimization (SEO) or rich link previews on WhatsApp and social media.
+## Requirements
 
----
+- Node.js version from `.nvmrc`
+- Docker-compatible runtime with Docker Compose (OrbStack or Docker Desktop)
 
-## 🚀 Key Features
+## Backend setup
 
-* **Advanced Catalog & Filtering:** Instant filtering by keyword, category, item condition (*New, Like New, Used*), home space, price in Costa Rican Colones (`₡`), and location across all 7 provinces of Costa Rica.
-* **Dynamic SEO & OpenGraph without Node.js:** Custom Go middleware intercepts listing routes (`/anuncio/:id`) and injects dynamic OpenGraph `<meta>` tags and **`Product` JSON-LD** structured data directly into `index.html` in under 1 ms—ensuring rich social previews on WhatsApp/Facebook and full Google indexing.
-* **Self-Service Listing Management:** Complete workflow for sellers to upload multiple images with automatic on-the-fly thumbnail generation (`300x300` and `800x600`), update item statuses (*Active, Paused, Sold*), and manage their active inventory.
-* **Direct WhatsApp Conversion:** Built-in WhatsApp lead generation with pre-filled messages containing the item's title, reference ID, and direct link.
-* **Authentication & Fine-Grained Security:** Email/password and OAuth2 login (Google / Facebook) protected by database-level *API Rules*, ensuring users can only modify their own listings and private favorites list.
-* **Single Portable Binary:** The compiled Preact frontend is embedded directly into the Go binary (`embed.FS`), running the API, SQLite database (WAL mode), image storage, moderation backoffice, and SPA inside a single process using under 40 MB of RAM.
+Install dependencies, start the local data services, and configure the API
+environment:
 
----
+```sh
+npm install
+npm run docker:up
+cp apps/api/.env.example apps/api/.env
+```
 
-## 🛠️ Tech Stack
+Set the CORS and secrets in `apps/api/.env`. Its database URLs match the default
+Compose credentials and ports. To override PostgreSQL credentials, set
+`POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_DB` for Compose and update
+`DATABASE_URL` to match. Before seeding a Store region, also set:
 
-| Layer | Technology | Architectural Role |
-| :--- | :--- | :--- |
-| **Backend & Core** | **Go (Golang)** + **PocketBase (v0.23+)** | HTTP server, business hooks, SEO meta injection, and REST/Realtime API. |
-| **Database** | **SQLite (WAL mode)** | High-performance embedded relational persistence. |
-| **Frontend** | **Preact** + **Vite** + **TypeScript** | Fast, lightweight reactive SPA interface (~3kB core). |
-| **State & Routing** | **`@preact/signals`** + **`preact-iso`** | Fine-grained reactive state management (Auth/Favorites) and client-side routing. |
+| Variable | Description |
+| --- | --- |
+| `MARKETPLACE_REGION_NAME` | Region name |
+| `MARKETPLACE_CURRENCY_CODE` | ISO currency code for the region |
+| `MARKETPLACE_COUNTRIES` | Comma-separated ISO alpha-2 country codes |
+| `MARKETPLACE_PAYMENT_PROVIDER_IDS` | Provider IDs registered in this environment (local SINPE: `pp_external_sinpe_external_sinpe`) |
 
----
+These deployment-specific choices are intentionally not hard-coded. The
+region seeder creates or updates the region with the configured name, making
+repeated runs safe.
 
-## 📂 Project Structure
+```sh
+npm run api:migrate
+npm run api:seed-region
+npm run api:build
+npm run api:dev
+```
 
-```text
-├── backend/                  # Go + PocketBase project
-│   ├── migrations/           # Collection schemas (listings, categories, favorites)
-│   ├── seo/                  # OpenGraph and JSON-LD injection middleware
-│   ├── pb_data/              # SQLite database and uploaded media (git-ignored)
-│   ├── main.go               # Entry point, custom hooks, and embedded static server
-│   └── go.mod
-├── frontend/                 # Preact SPA application
-│   ├── src/
-│   │   ├── components/       # Reusable UI components (Cards, Filters, Gallery)
-│   │   ├── pages/            # Route views (Home, Explore, Listing Detail, Publish, Profile)
-│   │   ├── lib/              # PocketBase SDK singleton and Signals stores
-│   │   └── main.tsx
-│   ├── index.html            # Base HTML template with SEO injection placeholders
-│   └── package.json
-└── README.md
+Use `npm run docker:logs` to follow the service logs and `npm run docker:down`
+to stop the services. `npm run docker:clean` also removes the persistent
+database and Redis volumes.
+
+The region is available to Store API clients at `GET /store/regions`; use a
+publishable API key as required by the Medusa Store API. Seller and buyer
+endpoints are scoped to the authenticated seller or customer. Payment
+providers must be configured in the Medusa payment module before their IDs are
+listed in the region environment variable. Fulfillment provider and stock
+location setup remains an environment-specific Medusa admin configuration.
+
+The local `external_sinpe` provider is a deferred-authorization marker only:
+it creates no payment record, never captures or refunds money, and does not
+process SINPE transfers. Sellers confirm transfers manually in their order
+workspace; buyers coordinate each seller order through the returned WhatsApp
+link. Do not list this provider in a region unless the matching module is
+registered.
+
+## Storefront
+
+The Preact client reads its API URL and public publishable key from
+`apps/storefront/.env`. Copy `apps/storefront/.env.example` there and set
+`VITE_PUBLISHABLE_API_KEY`; never put an admin key in a `VITE_` variable. The
+client uses generated Mercur route types, so build the API after configuring
+`apps/api/.env` and before type-checking or building the storefront:
+
+```sh
+npm run api:build
+npm run storefront:dev
+npm test
+npm run build
+```
+
+`npm run build` builds the Mercur API and Preact storefront; it requires the
+configured `apps/api/.env`. `npm test` runs the API policy/access-control tests
+and storefront unit tests. `npm run dev` starts the current storefront, and
+`npm run preview` previews its production build.
+
+The storefront exposes `/explorar` for category attributes, price, location,
+and URL-synchronized catalog filters; `/item/:handle` for checkout, contact,
+and reservation actions; `/carrito` for address, shipping, split-order
+completion, and external SINPE setup; `/vendedor/*` for seller publication,
+payment confirmation, and fulfillment; and `/cuenta` plus `/favoritos` for
+buyer activity. Buyer and seller sessions remain separate, and the API remains
+authoritative for seller scope, publication state, reservations, and order
+access.
+
+## Current marketplace API
+
+- Store catalog and region APIs use Medusa's `/store/*` routes.
+- Authenticated buyer features include wishlist, seller contact leads, and
+  reservation requests.
+- Seller management endpoints use `/vendor/*` and enforce seller scoping.
+- Category marketplace policies select checkout or direct-contact behavior;
+  category overrides take precedence over the configured default transaction
+  mode.
+
+See `openspec/changes/archive/2026-11-12-mercurjs-generic-marketplace/` for the
+implementation specification and task history.
