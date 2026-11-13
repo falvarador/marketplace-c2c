@@ -1,0 +1,36 @@
+{
+  "name": "@marketplace/api",
+  "private": true,
+  "version": "0.1.0",
+  "engines": {
+    "node": ">=24.22.1"
+  },
+  "scripts": {
+    "dev": "medusa develop",
+    "build": "medusa build",
+    "start": "medusa start",
+    "db:migrate": "medusa db:migrate",
+    "seed:region": "medusa exec ./src/scripts/configure-region.ts",
+    "test": "node --require ts-node/register --test src/utils/seller-policy.test.cjs src/api/access-control.test.cjs",
+    "test:e2e": "node src/e2e/marketplace.e2e.cjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@medusajs/admin-sdk": "2.22.6",
+    "@medusajs/cli": "2.22.6",
+    "@medusajs/framework": "2.22.6",
+    "@medusajs/icons": "2.22.6",
+    "@medusajs/medusa": "2.22.6",
+    "@mercurjs/core": "2.4.1",
+    "@mercurjs/types": "2.4.1",
+    "express": "4.21.2",
+    "http-proxy-middleware": "3.0.10"
+  },
+  "devDependencies": {
+    "@types/express": "4.17.25",
+    "@types/node": "24.19.2",
+    "pg": "^8.23.1",
+    "ts-node": "10.9.2",
+    "typescript": "5.9.3"
+  }
+}

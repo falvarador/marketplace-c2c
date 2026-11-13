@@ -3,10 +3,32 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=24.22.1"
+  },
+  "workspaces": [
+    "apps/*"
+  ],
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "build": "npm run api:build && npm run storefront:build",
+    "legacy:build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "api:dev": "npm run dev --workspace @marketplace/api",
+    "api:build": "npm run build --workspace @marketplace/api",
+    "api:start": "npm run start --workspace @marketplace/api",
+    "api:migrate": "npm run db:migrate --workspace @marketplace/api",
+    "api:test": "npm run test --workspace @marketplace/api",
+    "api:e2e": "npm run test:e2e --workspace @marketplace/api",
+    "api:seed-region": "npm run seed:region --workspace @marketplace/api",
+    "test": "npm run api:test && npm run storefront:test",
+    "storefront:dev": "npm run dev --workspace @marketplace/storefront",
+    "storefront:build": "npm run build --workspace @marketplace/storefront",
+    "storefront:test": "npm run test --workspace @marketplace/storefront",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:clean": "docker compose down -v",
+    "docker:logs": "docker compose logs -f"
   },
   "dependencies": {
     "preact": "^11.0.2"
